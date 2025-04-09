@@ -3,6 +3,9 @@ package com.javaaidev.chatagent.model;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+/**
+ * Message in a thread
+ */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "role")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = ThreadUserMessage.class, name = "user"),

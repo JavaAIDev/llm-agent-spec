@@ -1,5 +1,9 @@
 package com.javaaidev.chatagent.model;
 
+/**
+ * Text content
+ * @param text text
+ */
 public record TextContentPart(String text) implements ThreadUserContentPart, ThreadAssistantContentPart {
 
   @Override
