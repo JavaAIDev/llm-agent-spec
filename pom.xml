@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.javaaidev.llmagentspec</groupId>
+  <artifactId>llm-agent-spec</artifactId>
+  <version>0.1.0</version>
+  <packaging>pom</packaging>
+  <name>LLM Agent Spec</name>
+  <description>Spec of LLM Agents</description>
+
+  <url>https://github.com/JavaAIDev/llm-agent-spec</url>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Fu Cheng</name>
+      <email>alexcheng1982@gmail.com</email>
+    </developer>
+  </developers>
+  <modules>
+    <module>spring-ai-adapter</module>
+    <module>chat-agent-model</module>
+  </modules>
+
+  <scm>
+    <connection>
+      scm:git:git://github.com/JavaAIDev/llm-agent-spec.git
+    </connection>
+    <developerConnection>
+      scm:git:ssh://github.com:JavaAIDev/llm-agent-spec.git
+    </developerConnection>
+    <url>http://github.com/JavaAIDev/llm-agent-spec</url>
+  </scm>
+
+  <repositories>
+    <repository>
+      <id>mavenCentral</id>
+      <url>https://repo1.maven.org/maven2/</url>
+    </repository>
+  </repositories>
+
+  <profiles>
+    <profile>
+      <id>publish</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>0.7.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+              <tokenAuth>true</tokenAuth>
+              <autoPublish>true</autoPublish>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>2.2.1</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.jetbrains.dokka</groupId>
+            <artifactId>dokka-maven-plugin</artifactId>
+            <version>1.9.20</version>
+            <configuration>
+              <sourceDirectories>
+                <dir>${project.basedir}/src/main/java</dir>
+              </sourceDirectories>
+            </configuration>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>javadocJar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>

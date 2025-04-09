@@ -1,2 +1,1 @@
-# llm-agent-spec
-LLM Agent Spec
+# LLM Agent Spec
