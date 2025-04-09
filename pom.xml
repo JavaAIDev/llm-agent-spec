@@ -76,20 +76,18 @@
             </executions>
           </plugin>
           <plugin>
-            <groupId>org.jetbrains.dokka</groupId>
-            <artifactId>dokka-maven-plugin</artifactId>
-            <version>1.9.20</version>
-            <configuration>
-              <sourceDirectories>
-                <dir>${project.basedir}/src/main/java</dir>
-              </sourceDirectories>
-            </configuration>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.6.3</version>
             <executions>
               <execution>
-                <phase>package</phase>
+                <id>attach-javadocs</id>
                 <goals>
-                  <goal>javadocJar</goal>
+                  <goal>jar</goal>
                 </goals>
+                <configuration>
+                  <failOnError>false</failOnError>
+                </configuration>
               </execution>
             </executions>
           </plugin>
