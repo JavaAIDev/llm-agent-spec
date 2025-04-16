@@ -9,6 +9,11 @@
   <packaging>pom</packaging>
   <name>LLM Agent Spec</name>
   <description>Spec of LLM Agents</description>
+  <organization>
+    <name>JavaAIDev.com</name>
+    <url>https://javaaidev.com</url>
+  </organization>
+  <inceptionYear>2025</inceptionYear>
 
   <url>https://github.com/JavaAIDev/llm-agent-spec</url>
   <licenses>

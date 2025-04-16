@@ -14,11 +14,11 @@
   <description>Model adapter for Spring AI</description>
 
   <properties>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>17</java.version>
-    <spring-ai.version>1.0.0-M5</spring-ai.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <spring-ai.version>1.0.0-M6</spring-ai.version>
     <spring.version>6.2.3</spring.version>
   </properties>
 
