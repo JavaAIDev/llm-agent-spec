@@ -1,3 +1,3 @@
 # LLM Agent Spec
 
-Models of LLM agents
+Spec of LLM Agent
