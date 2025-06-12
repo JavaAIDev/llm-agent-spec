@@ -16,6 +16,7 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 
 /**
@@ -78,8 +79,9 @@ public class ModelAdapter {
       Flux<ChatResponse> chatResponse) {
     return chatResponse.concatMap(
             response -> Flux.fromIterable(response.getResults()))
-        .filter(generation -> Objects.nonNull(generation.getOutput().getText()))
+        .filter(generation -> Objects.nonNull(generation.getOutput()))
         .map(generation -> generation.getOutput().getText())
+        .filter(StringUtils::hasText)
         .map(text -> ServerSentEvent.<ChatAgentResponse>builder()
             .data(new ChatAgentResponse(
                 List.of(new TextContentPart(text))))
