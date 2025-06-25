@@ -78,7 +78,7 @@ public class ModelAdapter {
       Flux<ChatResponse> chatResponse) {
     return chatResponse.concatMap(
             response -> Flux.fromIterable(response.getResults()))
-        .filter(generation -> Objects.nonNull(generation.getOutput().getText()))
+        .filter(generation -> Objects.nonNull(generation.getOutput()) && Objects.nonNull(generation.getOutput().getText()))
         .map(generation -> generation.getOutput().getText())
         .map(text -> ServerSentEvent.<ChatAgentResponse>builder()
             .data(new ChatAgentResponse(
