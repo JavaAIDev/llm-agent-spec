@@ -6,9 +6,9 @@ import java.util.List;
  * Assistant message in a thread
  * @param id Message id
  * @param content Message content
- * @see ThreadAssistantContentPart
+ * @see ThreadAssistantMessagePart
  */
-public record ThreadAssistantMessage(String id, List<ThreadAssistantContentPart> content) implements ThreadMessage {
+public record ThreadAssistantMessage(String id, List<ThreadAssistantMessagePart> content) implements ThreadMessage {
 
   @Override
   public MessageRole getRole() {

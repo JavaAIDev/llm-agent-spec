@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.javaaidev.llmagentspec</groupId>
   <artifactId>llm-agent-spec</artifactId>
-  <version>0.2.3</version>
+  <version>0.3.0</version>
   <packaging>pom</packaging>
   <name>LLM Agent Spec</name>
   <description>Spec of LLM Agents</description>

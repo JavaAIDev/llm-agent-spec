@@ -2,13 +2,15 @@ package com.javaaidev.chatagent.springai;
 
 import com.javaaidev.chatagent.model.ChatAgentRequest;
 import com.javaaidev.chatagent.model.ChatAgentResponse;
-import com.javaaidev.chatagent.model.TextContentPart;
-import com.javaaidev.chatagent.model.ThreadAssistantContentPart;
+import com.javaaidev.chatagent.model.ReasoningMessagePart;
+import com.javaaidev.chatagent.model.TextMessagePart;
 import com.javaaidev.chatagent.model.ThreadAssistantMessage;
+import com.javaaidev.chatagent.model.ThreadAssistantMessagePart;
 import com.javaaidev.chatagent.model.ThreadUserMessage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -16,6 +18,7 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 
 /**
@@ -36,14 +39,14 @@ public class ModelAdapter {
     return request.messages().stream().flatMap(message -> {
       if (message instanceof ThreadUserMessage userMessage) {
         return userMessage.content().stream().map(part -> {
-          if (part instanceof TextContentPart textContentPart) {
+          if (part instanceof TextMessagePart textContentPart) {
             return new UserMessage(textContentPart.text());
           }
           return null;
         }).filter(Objects::nonNull);
       } else if (message instanceof ThreadAssistantMessage assistantMessage) {
         return assistantMessage.content().stream().map(part -> {
-          if (part instanceof TextContentPart textContentPart) {
+          if (part instanceof TextMessagePart textContentPart) {
             return new AssistantMessage(textContentPart.text());
           }
           return null;
@@ -60,11 +63,27 @@ public class ModelAdapter {
    * @return {@linkplain ChatAgentResponse} of chat agent
    */
   public static ChatAgentResponse toResponse(ChatResponse chatResponse) {
-    var content = new ArrayList<ThreadAssistantContentPart>();
+    var content = new ArrayList<ThreadAssistantMessagePart>();
     for (Generation generation : chatResponse.getResults()) {
-      content.add(new TextContentPart(generation.getOutput().getText()));
+      var message = generation.getOutput();
+      if (StringUtils.hasText(message.getText())) {
+        content.add(new TextMessagePart(message.getText()));
+      }
+      extractReasoning(message).ifPresent(
+          reasoning -> content.add(new ReasoningMessagePart(reasoning))
+      );
     }
     return new ChatAgentResponse(content);
+  }
+
+  private static Optional<String> extractReasoning(AssistantMessage assistantMessage) {
+    var metadata = assistantMessage.getMetadata();
+    return Stream.of("reasoningContent", "thinking")
+        .map(metadata::get)
+        .filter(Objects::nonNull)
+        .map(Object::toString)
+        .filter(StringUtils::hasText)
+        .findFirst();
   }
 
   /**
@@ -76,13 +95,10 @@ public class ModelAdapter {
    */
   public static Flux<ServerSentEvent<ChatAgentResponse>> toStreamingResponse(
       Flux<ChatResponse> chatResponse) {
-    return chatResponse.concatMap(
-            response -> Flux.fromIterable(response.getResults()))
-        .filter(generation -> Objects.nonNull(generation.getOutput()) && Objects.nonNull(generation.getOutput().getText()))
-        .map(generation -> generation.getOutput().getText())
-        .map(text -> ServerSentEvent.<ChatAgentResponse>builder()
-            .data(new ChatAgentResponse(
-                List.of(new TextContentPart(text))))
+    return chatResponse.map(ModelAdapter::toResponse)
+        .filter(ChatAgentResponse::hasContent)
+        .map(response -> ServerSentEvent.<ChatAgentResponse>builder()
+            .data(response)
             .build());
   }
 }

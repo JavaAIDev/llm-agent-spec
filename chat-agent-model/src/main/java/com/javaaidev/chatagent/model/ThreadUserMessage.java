@@ -6,9 +6,9 @@ import java.util.List;
  * User message in a thread
  * @param id Message id
  * @param content Message content
- * @see ThreadUserContentPart
+ * @see ThreadUserMessagePart
  */
-public record ThreadUserMessage(String id, List<ThreadUserContentPart> content) implements ThreadMessage {
+public record ThreadUserMessage(String id, List<ThreadUserMessagePart> content) implements ThreadMessage {
 
   @Override
   public MessageRole getRole() {

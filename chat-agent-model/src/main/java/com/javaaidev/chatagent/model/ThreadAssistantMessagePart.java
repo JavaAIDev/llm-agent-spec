@@ -1,5 +1,6 @@
 package com.javaaidev.chatagent.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -8,8 +9,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = TextContentPart.class, name = "text")
+    @JsonSubTypes.Type(value = TextMessagePart.class, name = "text"),
+    @JsonSubTypes.Type(value = ReasoningMessagePart.class, name = "reasoning")
 })
-public interface ThreadAssistantContentPart {
+public interface ThreadAssistantMessagePart {
+
+  @JsonIgnore
   String getType();
 }
