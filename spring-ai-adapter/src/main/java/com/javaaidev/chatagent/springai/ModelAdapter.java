@@ -1,13 +1,18 @@
 package com.javaaidev.chatagent.springai;
 
+import com.javaaidev.chatagent.model.Attachment;
 import com.javaaidev.chatagent.model.ChatAgentRequest;
 import com.javaaidev.chatagent.model.ChatAgentResponse;
+import com.javaaidev.chatagent.model.FileMessagePart;
+import com.javaaidev.chatagent.model.ImageMessagePart;
 import com.javaaidev.chatagent.model.ReasoningMessagePart;
 import com.javaaidev.chatagent.model.TextMessagePart;
 import com.javaaidev.chatagent.model.ThreadAssistantMessage;
 import com.javaaidev.chatagent.model.ThreadAssistantMessagePart;
 import com.javaaidev.chatagent.model.ThreadUserMessage;
+import com.javaaidev.chatagent.model.ThreadUserMessagePart;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -17,7 +22,10 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.content.Media;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.MimeType;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 
@@ -36,24 +44,53 @@ public class ModelAdapter {
    * @return A list of Spring AI {@linkplain Message}
    */
   public static List<Message> fromRequest(ChatAgentRequest request) {
-    return request.messages().stream().flatMap(message -> {
+    return request.messages().stream().map(message -> {
       if (message instanceof ThreadUserMessage userMessage) {
-        return userMessage.content().stream().map(part -> {
-          if (part instanceof TextMessagePart textContentPart) {
-            return new UserMessage(textContentPart.text());
+        var textBuilder = new StringBuilder();
+        var mediaList = new ArrayList<Media>();
+        if (!CollectionUtils.isEmpty(userMessage.content())) {
+          for (ThreadUserMessagePart part : userMessage.content()) {
+            if (part instanceof TextMessagePart textContentPart) {
+              textBuilder.append(textContentPart.text());
+            } else if (part instanceof FileMessagePart fileMessagePart) {
+              mediaList.add(Media.builder()
+                  .mimeType(MimeType.valueOf(fileMessagePart.mimeType()))
+                  .data(fileMessagePart.data()).build());
+            }
           }
-          return null;
-        }).filter(Objects::nonNull);
+        }
+        if (!CollectionUtils.isEmpty(userMessage.attachments())) {
+          for (Attachment attachment : userMessage.attachments()) {
+            var mimeType = MimeType.valueOf(attachment.contentType());
+            if (!CollectionUtils.isEmpty(attachment.content())) {
+              for (ThreadUserMessagePart part : attachment.content()) {
+                if (part instanceof ImageMessagePart imageMessagePart) {
+                  mediaList.add(
+                      Media.builder().mimeType(mimeType).data(imageMessagePart.image()).build());
+                } else if (part instanceof FileMessagePart fileMessagePart) {
+                  mediaList.add(Media.builder()
+                      .mimeType(mimeType)
+                      .data(fileMessagePart.data()).build());
+                }
+              }
+            }
+          }
+        }
+        return (Message) UserMessage.builder()
+            .text(textBuilder.toString())
+            .media(mediaList)
+            .build();
       } else if (message instanceof ThreadAssistantMessage assistantMessage) {
-        return assistantMessage.content().stream().map(part -> {
+        var textBuilder = new StringBuilder();
+        for (ThreadAssistantMessagePart part : assistantMessage.content()) {
           if (part instanceof TextMessagePart textContentPart) {
-            return new AssistantMessage(textContentPart.text());
+            textBuilder.append(textContentPart.text());
           }
-          return null;
-        }).filter(Objects::nonNull);
+        }
+        return AssistantMessage.builder().content(textBuilder.toString()).build();
       }
-      return Stream.<Message>of();
-    }).toList();
+      return null;
+    }).filter(Objects::nonNull).toList();
   }
 
   /**
@@ -72,6 +109,17 @@ public class ModelAdapter {
       extractReasoning(message).ifPresent(
           reasoning -> content.add(new ReasoningMessagePart(reasoning))
       );
+      if (!CollectionUtils.isEmpty(message.getMedia())) {
+        message.getMedia().forEach(media -> {
+          var mimeType = media.getMimeType();
+          if (isImage(mimeType)) {
+            content.add(new ImageMessagePart(fromMediaData(mimeType, media.getData())));
+          } else {
+            content.add(new FileMessagePart(fromMediaData(mimeType, media.getData()),
+                mimeType.toString()));
+          }
+        });
+      }
     }
     return new ChatAgentResponse(content);
   }
@@ -84,6 +132,26 @@ public class ModelAdapter {
         .map(Object::toString)
         .filter(StringUtils::hasText)
         .findFirst();
+  }
+
+  private static boolean isImage(MimeType mimeType) {
+    return "image".equalsIgnoreCase(mimeType.getType());
+  }
+
+  private static String fromMediaData(MimeType mimeType, Object data) {
+    if (data instanceof byte[] bytes) {
+      if (isImage(mimeType)) {
+        return String.format("data:%s;base64,%s", mimeType,
+            Base64.getEncoder().encodeToString(bytes));
+      } else {
+        return Base64.getEncoder().encodeToString(bytes);
+      }
+    } else if (data instanceof String text) {
+      return text;
+    } else {
+      throw new IllegalArgumentException(
+          "Unsupported media data type: " + data.getClass().getSimpleName());
+    }
   }
 
   /**

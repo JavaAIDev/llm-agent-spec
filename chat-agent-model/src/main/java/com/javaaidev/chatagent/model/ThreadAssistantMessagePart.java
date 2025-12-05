@@ -10,7 +10,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = TextMessagePart.class, name = "text"),
-    @JsonSubTypes.Type(value = ReasoningMessagePart.class, name = "reasoning")
+    @JsonSubTypes.Type(value = ReasoningMessagePart.class, name = "reasoning"),
+    @JsonSubTypes.Type(value = ImageMessagePart.class, name = "image"),
+    @JsonSubTypes.Type(value = FileMessagePart.class, name = "file"),
 })
 public interface ThreadAssistantMessagePart {
 
