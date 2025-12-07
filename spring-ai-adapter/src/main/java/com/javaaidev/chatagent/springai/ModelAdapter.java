@@ -26,7 +26,6 @@ import org.springframework.ai.content.Media;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 
 /**
@@ -103,7 +102,7 @@ public class ModelAdapter {
     var content = new ArrayList<ThreadAssistantMessagePart>();
     for (Generation generation : chatResponse.getResults()) {
       var message = generation.getOutput();
-      if (StringUtils.hasText(message.getText())) {
+      if (message.getText() != null) {
         content.add(new TextMessagePart(message.getText()));
       }
       extractReasoning(message).ifPresent(
@@ -130,7 +129,6 @@ public class ModelAdapter {
         .map(metadata::get)
         .filter(Objects::nonNull)
         .map(Object::toString)
-        .filter(StringUtils::hasText)
         .findFirst();
   }
 
