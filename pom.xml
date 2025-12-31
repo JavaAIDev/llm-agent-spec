@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.javaaidev.llmagentspec</groupId>
   <artifactId>llm-agent-spec</artifactId>
-  <version>0.5.0</version>
+  <version>0.6.0</version>
   <packaging>pom</packaging>
   <name>LLM Agent Spec</name>
   <description>Spec of LLM Agents</description>
@@ -32,6 +32,7 @@
   <modules>
     <module>spring-ai-adapter</module>
     <module>chat-agent-model</module>
+    <module>google-genai-adapter</module>
   </modules>
 
   <scm>
