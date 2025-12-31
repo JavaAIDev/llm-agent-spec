@@ -4,4 +4,4 @@ Spec of LLM Agent
 
 It defines request/response models of interacting with LLM agents.
 
-It also provides an adapter for using these models in Spring AI.
+It also provides adapters for using these models in Spring AI and Google Agent Development Kit.
