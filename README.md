@@ -1,5 +1,7 @@
 # LLM Agent Spec
 
+![Maven Central Version](https://img.shields.io/maven-central/v/com.javaaidev.llmagentspec/llm-agent-spec)
+
 Spec of LLM Agent
 
 It defines request/response models of interacting with LLM agents.
